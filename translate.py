@@ -12,6 +12,9 @@ from flax.training.common_utils import shard
 from modeling_flax_indictrans import FlaxIndicTransForConditionalGeneration
 from IndicTransTokenizer import IndicTransTokenizer, IndicProcessor
 import json
+import nltk
+nltk.download('punkt')
+
 
 def load_json_file(file_path):
     with open(file_path, 'r') as f:
