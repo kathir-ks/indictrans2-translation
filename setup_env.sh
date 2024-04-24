@@ -4,6 +4,7 @@ pip install -U "jax[tpu]" -f https://storage.googleapis.com/jax-releases/libtpu_
 pip install pyspark
 pip install torch torchvision torchaudio
 pip install datasets transformers
+pip install flax
 
 git clone https://github.com/kathir-ks/setu-translate
 
