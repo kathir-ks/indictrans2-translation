@@ -1,5 +1,5 @@
 
-cd setu-translate/stages/tlt_pipelines/flax
+# cd setu-translate/stages/tlt_pipelines/flax
 
 wget https://objectstore.e2enetworks.net/ai4b-public-nlu-nlg/sangraha/translation/it2_flax_weights.tar.gz
 
