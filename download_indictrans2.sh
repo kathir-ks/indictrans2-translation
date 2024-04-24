@@ -5,5 +5,3 @@ wget https://objectstore.e2enetworks.net/ai4b-public-nlu-nlg/sangraha/translatio
 
 tar -xvf it2_flax_weights.tar.gz
 
-huggingface-cli login --token "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"
-
