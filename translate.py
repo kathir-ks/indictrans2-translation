@@ -74,7 +74,7 @@ if __name__ == '__main__':
     
         for sample in batch:
             for key in batch_out.keys():
-                batch_out[key] += [sample[key]]
+                batch_out[key] += sample[key]
     
         for key, value_to_pad_with in keys_to_pad:
 
