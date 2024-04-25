@@ -24,7 +24,7 @@ def load_json_file(file_path):
 if __name__ == '__main__':
     
     parser = argparse.ArgumentParser(description="Tanslate tokenized sentences")
-    parser.add_argument("--model_path", type=str, required=True, help="Path to model checkpoint")
+    # parser.add_argument("--model_path", type=str, required=True, help="Path to model checkpoint")
     parser.add_argument("--subset", type=str, default=None, required=True)
     parser.add_argument("--lang", type=str, required=True)
     parser.add_argument("--batch_size", type=int, default=512, help="Batch size")
@@ -34,11 +34,15 @@ if __name__ == '__main__':
     subset = args.subset
     lang = args.lang
     batch_size = args.batch_size
-   
-    file_path = f'{subset}.json'
-     
-    #download the file from google storage
-    os.system(f'gsutil cp gs://indic-llama/{subset}.json {subset}.json')
+    
+    curr_dir = os.getcwd()
+
+    file_path = f'{curr_dir}/{subset}.json'
+    model_path = f'{curr_dir}/flax_weights/en-indic/200m'
+    
+    #download the file from google storage if file does not exist
+    if not os.path.isfile(file_path):
+        os.system(f'gsutil cp gs://indic-llama/{subset}.json {subset}.json')
 
     local_device_count = jax.local_devices()
     
