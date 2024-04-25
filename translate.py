@@ -39,7 +39,7 @@ if __name__ == '__main__':
 
     file_path = f'{curr_dir}/{subset}.json'
     model_path = f'{curr_dir}/flax_weights/en-indic/200m'
-    
+
     #download the file from google storage if file does not exist
     if not os.path.isfile(file_path):
         os.system(f'gsutil cp gs://indic-llama/{subset}.json {subset}.json')
@@ -47,7 +47,7 @@ if __name__ == '__main__':
     local_device_count = jax.local_devices()
     
     #load json data
-    data = load_json_file(subset)
+    data = load_json_file(file_path)
 
     inputs = []
     indices = []
