@@ -59,8 +59,8 @@ if __name__ == '__main__':
 
     for i in data:
         indices.extend(i['indices'])
-        input_ids.extend(i['inputs']['input_ids'])
-        attention_mask.extend(i['inputs']['attention_mask'])
+        input_ids.extend(i['tokenized_inputs']['input_ids'])
+        attention_mask.extend(i['tokenized_inputs']['attention_mask'])
 
     def padding_fn(
         batch,
