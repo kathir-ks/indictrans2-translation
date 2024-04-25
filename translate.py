@@ -101,7 +101,7 @@ if __name__ == '__main__':
             "attention_mask": attention_mask[i : i + batch_size]
         }
         
-        inputs = padding_fn(inputs)
+        input = padding_fn(input)
 
         inputs.append(input)
 
