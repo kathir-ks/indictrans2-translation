@@ -72,7 +72,7 @@ if __name__ == '__main__':
 
         batch_out = {key: [] for key in batch.keys()}
     
-        for sample in [batch]:
+        for sample in batch:
             for key in batch_out.keys():
                 batch_out[key] += [sample[key]]
     
