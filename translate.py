@@ -54,13 +54,14 @@ if __name__ == '__main__':
     input_ids = []
     attention_mask = []
     
-    assert len(indices) == len(input_ids)
-    assert len(input_ids) == len(attention_mask)
 
     for i in data:
         indices.extend(i['indices'])
         input_ids.extend(i['tokenized_input']['input_ids'])
         attention_mask.extend(i['tokenized_input']['attention_mask'])
+
+    assert len(indices) == len(input_ids)
+    assert len(input_ids) == len(attention_mask)
 
     def padding_fn(
         batch,
@@ -72,9 +73,8 @@ if __name__ == '__main__':
 
         batch_out = {key: [] for key in batch.keys()}
     
-        for sample in batch:
-            for key in batch_out.keys():
-                batch_out[key] += sample[key]
+        for key in batch_out.keys():
+            batch_out[key] += batch[key]
     
         for key, value_to_pad_with in keys_to_pad:
 
@@ -114,7 +114,7 @@ if __name__ == '__main__':
 
     params = replicate(model.params)
 
-    @jax.jit
+    # @jax.jit
     def generate(
             batch,
             params,
@@ -130,23 +130,30 @@ if __name__ == '__main__':
 
     p_generate = jax.pmap(generate) 
 
-    @jax.jit
+    # @jax.jit
     def run_inference_step(batch, params, run_ds):
 
         input_batch = {
-            "input_ids": shard((batch["input_ids"])),
-            "attention_mask": shard((batch["attention_mask"]))
+            "input_ids": shard(jnp.array(batch["input_ids"])),
+            "attention_mask": shard(jnp.array(batch["attention_mask"]))
         }
         
-        output = p_generate(input_batch, params)
+        output = []
+        try:
+            output = p_generate(input_batch, params)
 
-        output = output.block_until_ready()
+            output = output.block_until_ready()
 
-        if local_device_count != 1:
-            output = output.reshape(-1, *output.shape[2:])
-        else:
-            output = output[0]
-        
+            if local_device_count != 1:
+                output = output.reshape(-1, *output.shape[2:])
+            else:
+                output = output[0]
+
+            print("Inference step completed")
+
+        except:
+            print("!Error in inference step")
+
         return output
 
 
