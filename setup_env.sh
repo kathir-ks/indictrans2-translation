@@ -6,7 +6,7 @@ pip install datasets transformers
 pip install flax
 
 # git clone https://github.com/kathir-ks/setu-translate
-
+mkdir flax_weights
 # cd setu-translate/
 # cd IndicTransTokenizer/
 # pip install --editable ./

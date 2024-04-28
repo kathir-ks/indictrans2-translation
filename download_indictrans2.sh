@@ -5,4 +5,4 @@
 
 # tar -xvf it2_flax_weights.tar.gz
 
-gsutil cp gs://indic-llama/flax_weights/ flax_weights/
+gsutil cp -R gs://indic-llama/flax_weights/ flax_weights/
