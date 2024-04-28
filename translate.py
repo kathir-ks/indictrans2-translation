@@ -40,6 +40,10 @@ if __name__ == '__main__':
     file_path = f'{curr_dir}/{subset}.json'
     model_path = f'{curr_dir}/flax_weights/en-indic/200m'
 
+    if os.path.isdir(model_path):
+        os.system("mkdir flax_weights")
+        os.system("gsutil cp -R gs://indic-llama/flax_weights/200m")
+        
     #download the file from google storage if file does not exist
     if not os.path.isfile(file_path):
         os.system(f'gsutil cp gs://indic-llama/{subset}.json {subset}.json')
