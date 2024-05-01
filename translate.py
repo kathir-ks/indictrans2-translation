@@ -30,7 +30,6 @@ if __name__ == '__main__':
     parser.add_argument("--batch_size", type=int, default=512, help="Batch size")
 
     args = parser.parse_args()
-    model_path = args.model_path
     subset = args.subset
     lang = args.lang
     batch_size = args.batch_size
@@ -38,12 +37,12 @@ if __name__ == '__main__':
     curr_dir = os.getcwd()
 
     file_path = f'{curr_dir}/{subset}.json'
-    model_path = f'{curr_dir}/flax_weights/en-indic/200m'
+    model_path = f'{curr_dir}/flax_weights/200m'
 
     if os.path.isdir(model_path):
         os.system("mkdir flax_weights")
         os.system("gsutil cp -R gs://indic-llama/flax_weights/200m")
-        
+
     #download the file from google storage if file does not exist
     if not os.path.isfile(file_path):
         os.system(f'gsutil cp gs://indic-llama/{subset}.json {subset}.json')
@@ -66,7 +65,8 @@ if __name__ == '__main__':
 
     assert len(indices) == len(input_ids)
     assert len(input_ids) == len(attention_mask)
-
+    
+    one = 0
     def padding_fn(
         batch,
         keys_to_pad=[
@@ -85,6 +85,12 @@ if __name__ == '__main__':
             len_list = list(map(lambda x: len(x), batch_out[key]))
 
             padding_length = max(len_list)
+
+            if(padding_length) > 256:
+                one += 1
+                # print(one)
+                return None
+            
             array_list = []
             for i, x in enumerate(batch_out[key]):
 
@@ -106,9 +112,11 @@ if __name__ == '__main__':
         }
         
         input = padding_fn(input)
-
-        inputs.append(input)
-
+        if input:
+            inputs.append(input)
+    
+    print("total_sentences" + len(input) * 64)
+    print(one * 64+ "missed" )
 
     model = FlaxIndicTransForConditionalGeneration.from_pretrained(
         model_path, 
@@ -134,7 +142,7 @@ if __name__ == '__main__':
 
     p_generate = jax.pmap(generate) 
 
-    # @jax.jit
+    @jax.jit
     def run_inference_step(batch, params, run_ds):
 
         input_batch = {
