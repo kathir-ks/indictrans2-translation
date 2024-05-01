@@ -87,8 +87,8 @@ if __name__ == '__main__':
             padding_length = max(len_list)
 
             if(padding_length) > 256:
-                one += 1
-                # print(one)
+                
+                print('one')
                 return None
             
             array_list = []
@@ -115,9 +115,7 @@ if __name__ == '__main__':
         if input:
             inputs.append(input)
     
-    print("total_sentences" + len(input) * 64)
-    print(one * 64+ "missed" )
-
+    print("total_sentences" + len(input) * batch_size)
     model = FlaxIndicTransForConditionalGeneration.from_pretrained(
         model_path, 
         local_files_only=True,
