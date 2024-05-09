@@ -14,7 +14,7 @@ from IndicTransTokenizer import IndicTransTokenizer, IndicProcessor
 import json
 import nltk
 nltk.download('punkt')
-import time
+
 
 def load_json_file(file_path):
     with open(file_path, 'r') as f:
@@ -28,8 +28,6 @@ if __name__ == '__main__':
     parser.add_argument("--subset", type=str, default=None, required=True)
     parser.add_argument("--lang", type=str, required=True)
     parser.add_argument("--batch_size", type=int, default=512, help="Batch size")
-    
-    t = time.time()
 
     args = parser.parse_args()
     subset = args.subset
@@ -65,13 +63,10 @@ if __name__ == '__main__':
         input_ids.extend(i['tokenized_input']['input_ids'])
         attention_mask.extend(i['tokenized_input']['attention_mask'])
 
-    input_ids = input_ids[:1024000]
-    attention_mask = attention_mask[:1024000]
-    indices = indices[:1024000]
-
     assert len(indices) == len(input_ids)
     assert len(input_ids) == len(attention_mask)
     
+    one = 0
     def padding_fn(
         batch,
         keys_to_pad=[
@@ -91,7 +86,7 @@ if __name__ == '__main__':
 
             padding_length = max(len_list)
 
-            if (padding_length) > 256:
+            if(padding_length) > 256:
                 
                 print('one')
                 return None
@@ -164,6 +159,8 @@ if __name__ == '__main__':
             else:
                 output = output[0]
 
+            print("Inference step completed")
+
         except:
             print("!Error in inference step")
 
@@ -208,5 +205,3 @@ if __name__ == '__main__':
     
     with open('{subset}_output.json', 'w') as f:
         json.dump(dataset, f)
-        
-    print(time.time() - t)
