@@ -43,11 +43,11 @@ if __name__ == '__main__':
 
     if os.path.isdir(model_path):
         os.system("mkdir flax_weights")
-        os.system("gsutil cp -R gs://indic-llama/flax_weights/200m")
+        os.system("gsutil cp -R gs://indic-llama-data/indic-llama/flax_weights/200m")
 
     #download the file from google storage if file does not exist
     if not os.path.isfile(file_path):
-        os.system(f'gsutil cp gs://indic-llama/{subset}.json {subset}.json')
+        os.system(f'gsutil cp gs://indic-llama-data/indic-llama/{subset}.json {subset}.json')
 
     local_device_count = jax.local_devices()
     
