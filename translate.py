@@ -41,7 +41,7 @@ if __name__ == '__main__':
     file_path = f'{curr_dir}/{subset}.json'
     model_path = f'{curr_dir}/flax_weights/200m'
 
-    if os.path.isdir(model_path):
+    if not os.path.isdir(model_path):
         os.system("mkdir flax_weights")
         os.system("gsutil cp -R gs://indic-llama-data/indic-llama/flax_weights/200m")
 
