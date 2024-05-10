@@ -120,7 +120,6 @@ if __name__ == '__main__':
         if input:
             inputs.append(input)
     
-    print("total_sentences" + len(input) * batch_size)
     model = FlaxIndicTransForConditionalGeneration.from_pretrained(
         model_path, 
         local_files_only=True,
