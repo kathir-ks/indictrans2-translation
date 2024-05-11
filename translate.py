@@ -204,10 +204,10 @@ if __name__ == '__main__':
     #         prev_id = indices[i]
 
     # dataset.append(prev_sent)
+    print(time.time() - t)
     
     output_string = ' '.join(sentences)
     
     with open(f'{subset}_output.txt', 'w') as f:
         f.write(output_string)
         
-    print(time.time() - t)
