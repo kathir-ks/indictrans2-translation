@@ -144,7 +144,7 @@ if __name__ == '__main__':
 
     p_generate = jax.pmap(generate) 
 
-    @jax.jit
+    # @jax.jit
     def run_inference_step(batch, params, run_ds):
 
         input_batch = {
@@ -186,26 +186,28 @@ if __name__ == '__main__':
         out = ip.postprocess_batch(out, lang=lang)
         sentences.extend(out)
     
-    dataset = []
+    # dataset = []
 
-    assert len(indices) == len(sentences)
+    # assert len(indices) == len(sentences)
 
-    prev_id = 0
-    prev_sent = ''
+    # prev_id = 0
+    # prev_sent = ''
 
-    for i in range(len(sentences)):
+    # for i in range(len(sentences)):
 
-        if prev_id == indices[i]:
-            prev_sent+=sentences[i]
+    #     if prev_id == indices[i]:
+    #         prev_sent+=sentences[i]
 
-        else :
-            dataset.append(prev_sent)
-            prev_sent = sentences[i]
-            prev_id = indices[i]
+    #     else :
+    #         dataset.append(prev_sent)
+    #         prev_sent = sentences[i]
+    #         prev_id = indices[i]
 
-    dataset.append(prev_sent)
+    # dataset.append(prev_sent)
     
-    with open('{subset}_output.json', 'w') as f:
-        json.dump(dataset, f)
+    output_string = ' '.join(sentences)
+    
+    with open(f'{subset}_output.txt', 'w') as f:
+        f.write(output_string)
         
     print(time.time() - t)
