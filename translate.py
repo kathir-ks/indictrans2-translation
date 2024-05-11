@@ -65,9 +65,9 @@ if __name__ == '__main__':
         input_ids.extend(i['tokenized_input']['input_ids'])
         attention_mask.extend(i['tokenized_input']['attention_mask'])
 
-    input_ids = input_ids[:1024000]
-    attention_mask = attention_mask[:1024000]
-    indices = indices[:1024000]
+    input_ids = input_ids[:102400]
+    attention_mask = attention_mask[:102400]
+    indices = indices[:102400]
 
     assert len(indices) == len(input_ids)
     assert len(input_ids) == len(attention_mask)
