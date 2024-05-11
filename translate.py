@@ -43,7 +43,7 @@ if __name__ == '__main__':
 
     if not os.path.isdir(model_path):
         os.system("mkdir flax_weights")
-        os.system("gsutil cp -R gs://indic-llama-data/indic-llama/flax_weights/200m flax_weights/200m")
+        os.system(f'gsutil cp -R gs://indic-llama-data/indic-llama/flax_weights/200m {curr_dir}/flax_weights/200m')
 
     #download the file from google storage if file does not exist
     if not os.path.isfile(file_path):
