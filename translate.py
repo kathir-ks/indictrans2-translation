@@ -175,6 +175,8 @@ if __name__ == '__main__':
         output = run_inference_step(input, params, None)
         outputs.append(output)
 
+    print("Inference completed!")
+
     #load tokenizer and preprocessor
     tokenizer = IndicTransTokenizer(direction="en-indic")
     ip = IndicProcessor(inference=True)
@@ -186,6 +188,7 @@ if __name__ == '__main__':
         out = ip.postprocess_batch(out, lang=lang)
         sentences.extend(out)
     
+    print("decoding completed...")
     # dataset = []
 
     # assert len(indices) == len(sentences)
