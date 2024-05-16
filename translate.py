@@ -91,7 +91,7 @@ if __name__ == '__main__':
 
             padding_length = max(len_list)
 
-            if (padding_length) > 256:
+            if padding_length > 256:
                 
                 print('one')
                 return None
