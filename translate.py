@@ -49,7 +49,7 @@ if __name__ == '__main__':
     if not os.path.isfile(file_path):
         os.system(f'gsutil cp gs://indic-llama-data/indic-llama/{subset}.json {subset}.json')
 
-    local_device_count = jax.local_devices()
+    local_device_count = jax.local_device_count()
     
     #load json data
     data = load_json_file(file_path)
