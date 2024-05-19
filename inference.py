@@ -1,8 +1,4 @@
 import os
-import sys
-import subprocess
-# import torch
-# from torch.utils.data import DataLoader
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -10,11 +6,10 @@ import argparse
 from flax.jax_utils import replicate
 from flax.training.common_utils import shard
 from modeling_flax_indictrans import FlaxIndicTransForConditionalGeneration
-from IndicTransTokenizer import IndicTransTokenizer, IndicProcessor
 import json
 import nltk
 nltk.download('punkt')
-
+import time
 
 def load_json_file(file_path):
     with open(file_path, 'r') as f:
@@ -28,6 +23,8 @@ if __name__ == '__main__':
     parser.add_argument("--subset", type=str, default=None, required=True)
     parser.add_argument("--lang", type=str, required=True)
     parser.add_argument("--batch_size", type=int, default=512, help="Batch size")
+    
+    t = time.time()
 
     args = parser.parse_args()
     subset = args.subset
@@ -39,15 +36,15 @@ if __name__ == '__main__':
     file_path = f'{curr_dir}/{subset}.json'
     model_path = f'{curr_dir}/flax_weights/200m'
 
-    if os.path.isdir(model_path):
+    if not os.path.isdir(model_path):
         os.system("mkdir flax_weights")
-        os.system("gsutil cp -R gs://indic-llama/flax_weights/200m")
+        os.system(f'gsutil cp -R gs://indic-llama-data/indic-llama/flax_weights/200m {curr_dir}/flax_weights/')
 
     #download the file from google storage if file does not exist
     if not os.path.isfile(file_path):
-        os.system(f'gsutil cp gs://indic-llama/{subset}.json {subset}.json')
+        os.system(f'gsutil cp gs://indic-llama-data/indic-llama/{subset}.json {subset}.json')
 
-    local_device_count = jax.local_devices()
+    local_device_count = jax.local_device_count()
     
     #load json data
     data = load_json_file(file_path)
@@ -63,10 +60,13 @@ if __name__ == '__main__':
         input_ids.extend(i['tokenized_input']['input_ids'])
         attention_mask.extend(i['tokenized_input']['attention_mask'])
 
+    input_ids = input_ids[:102400]
+    attention_mask = attention_mask[:102400]
+    indices = indices[:102400]
+
     assert len(indices) == len(input_ids)
     assert len(input_ids) == len(attention_mask)
     
-    one = 0
     def padding_fn(
         batch,
         keys_to_pad=[
@@ -86,7 +86,7 @@ if __name__ == '__main__':
 
             padding_length = max(len_list)
 
-            if(padding_length) > 256:
+            if padding_length > 256:
                 
                 print('one')
                 return None
@@ -115,7 +115,6 @@ if __name__ == '__main__':
         if input:
             inputs.append(input)
     
-    print("total_sentences" + len(input) * batch_size)
     model = FlaxIndicTransForConditionalGeneration.from_pretrained(
         model_path, 
         local_files_only=True,
@@ -140,7 +139,7 @@ if __name__ == '__main__':
 
     p_generate = jax.pmap(generate) 
 
-    @jax.jit
+    # @jax.jit
     def run_inference_step(batch, params, run_ds):
 
         input_batch = {
@@ -148,7 +147,6 @@ if __name__ == '__main__':
             "attention_mask": shard(jnp.array(batch["attention_mask"]))
         }
         
-        output = []
         try:
             output = p_generate(input_batch, params)
 
@@ -159,49 +157,24 @@ if __name__ == '__main__':
             else:
                 output = output[0]
 
-            print("Inference step completed")
+            return output
 
         except:
             print("!Error in inference step")
-
-        return output
-
+            return None
 
     outputs = []
 
     for input in inputs:
         output = run_inference_step(input, params, None)
-        outputs.append(output)
+        if output:
+            output = output.tolist()
+            outputs.append(output)
 
-    #load tokenizer and preprocessor
-    tokenizer = IndicTransTokenizer(direction="en-indic")
-    ip = IndicProcessor(inference=True)
+    print("Inference completed!")
+
+    with open(f'{subset}_output.json', 'w') as f:
+        json.dump(outputs, f)
+
     
-    sentences = []
-
-    for output in outputs:
-        out = tokenizer.batch_decode(np.asarray(output), src=False)
-        out = ip.postprocess_batch(out, lang=lang)
-        sentences.extend(out)
     
-    dataset = []
-
-    assert len(indices) == len(sentences)
-
-    prev_id = 0
-    prev_sent = ''
-
-    for i in range(len(sentences)):
-
-        if prev_id == indices[i]:
-            prev_sent+=sentences[i]
-
-        else :
-            dataset.append(prev_sent)
-            prev_sent = sentences[i]
-            prev_id = indices[i]
-
-    dataset.append(prev_sent)
-    
-    with open('{subset}_output.json', 'w') as f:
-        json.dump(dataset, f)
