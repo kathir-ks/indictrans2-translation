@@ -53,16 +53,15 @@ if __name__ == '__main__':
     indices = []
     input_ids = []
     attention_mask = []
-    
 
     for i in data:
         indices.extend(i['indices'])
         input_ids.extend(i['tokenized_input']['input_ids'])
         attention_mask.extend(i['tokenized_input']['attention_mask'])
 
-    input_ids = input_ids[:102400]
-    attention_mask = attention_mask[:102400]
-    indices = indices[:102400]
+    # input_ids = input_ids[:102400]
+    # attention_mask = attention_mask[:102400]
+    # indices = indices[:102400]
 
     assert len(indices) == len(input_ids)
     assert len(input_ids) == len(attention_mask)
@@ -86,7 +85,7 @@ if __name__ == '__main__':
 
             padding_length = max(len_list)
 
-            if padding_length > 256:
+            if (padding_length) > 256:
                 
                 print('one')
                 return None
