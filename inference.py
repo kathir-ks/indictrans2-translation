@@ -80,7 +80,7 @@ def main(model, params, data, batch_size, shard):
         }
         
         input = padding_fn(input)
-        if input and len(input) % local_device_count==0:
+        if input and len(input['input_ids']) % local_device_count==0:
             inputs.append(input)
 
     # @jax.jit
