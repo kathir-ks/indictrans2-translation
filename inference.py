@@ -165,7 +165,7 @@ if __name__ =='__main__':
 
     for i in range (0, len(data), 10000):
 
-        data = data[i : i + 10000]
+        batch = data[i : i + 10000]
 
         model = FlaxIndicTransForConditionalGeneration.from_pretrained(
             model_path, 
@@ -177,7 +177,7 @@ if __name__ =='__main__':
         params = replicate(model.params)
         print("model replicated")
 
-        main(model, params, data, batch_size, shard)
+        main(model, params, batch, batch_size, shard)
 
         shard = shard + 1
 
