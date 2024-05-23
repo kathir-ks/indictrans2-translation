@@ -127,14 +127,15 @@ def main(model, params, data, batch_size, shard_no):
 
     for input in inputs:
         output = run_inference_step(input, params, None)
-        outputs.append(output.tolist())
+        outputs.extend(output.tolist())
 
     print("Inference completed!")
     print(time.time() - t)
     
-    with open(f'{subset}_output_{shard_no}.json', 'w') as f:
-        json.dump(outputs, f)
+    # with open(f'{subset}_output_{shard_no}.json', 'w') as f:
+    #     json.dump(outputs, f)
 
+    return outputs
 
 if __name__ =='__main__':
 
@@ -160,6 +161,7 @@ if __name__ =='__main__':
 
     
     shard_no = 1
+    output_tokens = []
 
     data = load_json_file(file_path=file_path)
 
@@ -177,7 +179,8 @@ if __name__ =='__main__':
         params = replicate(model.params)
         print("model replicated")
 
-        main(model, params, batch, batch_size, shard_no)
+        out = main(model, params, batch, batch_size, shard_no)
+        output_tokens.extend(out)
 
         shard_no = shard_no + 1
 
