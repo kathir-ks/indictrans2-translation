@@ -130,7 +130,6 @@ def main(model, params, data, batch_size, shard):
         outputs.append(output.tolist())
 
     print("Inference completed!")
-    print("decoding completed...")
     print(time.time() - t)
     
     with open(f'{subset}_output_{shard}.json', 'w') as f:
@@ -160,7 +159,6 @@ if __name__ =='__main__':
         os.system(f'gsutil cp gs://indic-llama-data/indic-llama/{subset}.json {subset}.json')
 
     
-
     shard = 1
 
     data = load_json_file(file_path=file_path)
