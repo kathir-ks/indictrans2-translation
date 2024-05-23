@@ -17,7 +17,7 @@ def load_json_file(file_path):
         data = json.load(f)
     return data
 
-def main(model, params, data, batch_size, shard):
+def main(model, params, data, batch_size, shard_no):
         
     t = time.time()
 
@@ -132,7 +132,7 @@ def main(model, params, data, batch_size, shard):
     print("Inference completed!")
     print(time.time() - t)
     
-    with open(f'{subset}_output_{shard}.json', 'w') as f:
+    with open(f'{subset}_output_{shard_no}.json', 'w') as f:
         json.dump(outputs, f)
 
 
@@ -159,7 +159,7 @@ if __name__ =='__main__':
         os.system(f'gsutil cp gs://indic-llama-data/indic-llama/{subset}.json {subset}.json')
 
     
-    shard = 1
+    shard_no = 1
 
     data = load_json_file(file_path=file_path)
 
@@ -177,7 +177,7 @@ if __name__ =='__main__':
         params = replicate(model.params)
         print("model replicated")
 
-        main(model, params, batch, batch_size, shard)
+        main(model, params, batch, batch_size, shard_no)
 
         shard = shard + 1
 
