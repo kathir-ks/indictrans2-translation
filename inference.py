@@ -6,6 +6,7 @@ import argparse
 from flax.jax_utils import replicate
 from flax.training.common_utils import shard
 from modeling_flax_indictrans import FlaxIndicTransForConditionalGeneration
+from IndicTransTokenizer import IndicTransTokenizer, IndicProcessor
 import json
 import nltk
 nltk.download('punkt')
@@ -16,52 +17,20 @@ def load_json_file(file_path):
         data = json.load(f)
     return data
 
-if __name__ == '__main__':
-    
-    parser = argparse.ArgumentParser(description="Tanslate tokenized sentences")
-    # parser.add_argument("--model_path", type=str, required=True, help="Path to model checkpoint")
-    parser.add_argument("--subset", type=str, default=None, required=True)
-    parser.add_argument("--lang", type=str, required=True)
-    parser.add_argument("--batch_size", type=int, default=512, help="Batch size")
-    
+def main(model, params, data, batch_size, shard):
+        
     t = time.time()
 
-    args = parser.parse_args()
-    subset = args.subset
-    lang = args.lang
-    batch_size = args.batch_size
-    
-    curr_dir = os.getcwd()
-
-    file_path = f'{curr_dir}/{subset}.json'
-    model_path = f'{curr_dir}/flax_weights/200m'
-
-    if not os.path.isdir(model_path):
-        os.system("mkdir flax_weights")
-        os.system(f'gsutil cp -R gs://indic-llama-data/indic-llama/flax_weights/200m {curr_dir}/flax_weights/')
-
-    #download the file from google storage if file does not exist
-    if not os.path.isfile(file_path):
-        os.system(f'gsutil cp gs://indic-llama-data/indic-llama/{subset}.json {subset}.json')
-
     local_device_count = jax.local_device_count()
-    
-    #load json data
-    data = load_json_file(file_path)
-
     inputs = []
     indices = []
     input_ids = []
     attention_mask = []
-
+    
     for i in data:
         indices.extend(i['indices'])
         input_ids.extend(i['tokenized_input']['input_ids'])
         attention_mask.extend(i['tokenized_input']['attention_mask'])
-
-    # input_ids = input_ids[:102400]
-    # attention_mask = attention_mask[:102400]
-    # indices = indices[:102400]
 
     assert len(indices) == len(input_ids)
     assert len(input_ids) == len(attention_mask)
@@ -85,9 +54,9 @@ if __name__ == '__main__':
 
             padding_length = max(len_list)
 
-            if (padding_length) > 256:
+            if padding_length > 256:
                 
-                print('one')
+                print(padding_length)
                 return None
             
             array_list = []
@@ -111,16 +80,8 @@ if __name__ == '__main__':
         }
         
         input = padding_fn(input)
-        if input:
+        if input and len(input) % local_device_count==0:
             inputs.append(input)
-    
-    model = FlaxIndicTransForConditionalGeneration.from_pretrained(
-        model_path, 
-        local_files_only=True,
-        dtype=jnp.float16,
-    )
-
-    params = replicate(model.params)
 
     # @jax.jit
     def generate(
@@ -140,12 +101,13 @@ if __name__ == '__main__':
 
     # @jax.jit
     def run_inference_step(batch, params, run_ds):
-
+        
         input_batch = {
             "input_ids": shard(jnp.array(batch["input_ids"])),
             "attention_mask": shard(jnp.array(batch["attention_mask"]))
         }
         
+        output = []
         try:
             output = p_generate(input_batch, params)
 
@@ -156,24 +118,66 @@ if __name__ == '__main__':
             else:
                 output = output[0]
 
-            return output
-
         except:
             print("!Error in inference step")
-            return None
+
+        return output
 
     outputs = []
 
     for input in inputs:
         output = run_inference_step(input, params, None)
-        if output:
-            output = output.tolist()
-            outputs.append(output)
+        outputs.append(output.tolist())
 
     print("Inference completed!")
-
-    with open(f'{subset}_output.json', 'w') as f:
+    print("decoding completed...")
+    print(time.time() - t)
+    
+    with open(f'{subset}_output_{shard}.json', 'w') as f:
         json.dump(outputs, f)
 
-    
+
+if __name__ =='__main__':
+
+    parser = argparse.ArgumentParser(description="Tanslate tokenized sentences")
+    parser.add_argument("--subset", type=str, default=None, required=True)
+    parser.add_argument("--batch_size", type=int, default=512, help="Batch size")
+
+    args = parser.parse_args()
+    subset = args.subset
+    batch_size = args.batch_size
+
+    curr_dir = os.getcwd()
+    file_path = f'{curr_dir}/{subset}.json'
+    model_path = f'{curr_dir}/flax_weights/200m'
+
+    if not os.path.isdir(model_path):
+        os.system("mkdir flax_weights")
+        os.system(f'gsutil cp -R gs://indic-llama-data/indic-llama/flax_weights/200m {curr_dir}/flax_weights/')
+
+    #download the file from google storage if file does not exist
+    if not os.path.isfile(file_path):
+        os.system(f'gsutil cp gs://indic-llama-data/indic-llama/{subset}.json {subset}.json')
+
+    model = FlaxIndicTransForConditionalGeneration.from_pretrained(
+        model_path, 
+        local_files_only=True,
+        dtype=jnp.float16,
+    )
+    print("model loaded")
+
+    params = replicate(model.params)
+    print("model replicated")
+
+    shard = 1
+
+    data = load_json_file(file_path=file_path)
+
+    for i in range (0, len(data), 10000):
+
+        data = data[i : i + 10000]
+
+        main(model, params, data, batch_size, shard)
+
+        shard = shard + 1
     
