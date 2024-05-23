@@ -179,7 +179,7 @@ if __name__ =='__main__':
 
         main(model, params, batch, batch_size, shard_no)
 
-        shard = shard + 1
+        shard_no = shard_no + 1
 
         del model, params
     
