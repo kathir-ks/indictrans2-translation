@@ -159,15 +159,7 @@ if __name__ =='__main__':
     if not os.path.isfile(file_path):
         os.system(f'gsutil cp gs://indic-llama-data/indic-llama/{subset}.json {subset}.json')
 
-    model = FlaxIndicTransForConditionalGeneration.from_pretrained(
-        model_path, 
-        local_files_only=True,
-        dtype=jnp.float16,
-    )
-    print("model loaded")
-
-    params = replicate(model.params)
-    print("model replicated")
+    
 
     shard = 1
 
@@ -177,7 +169,19 @@ if __name__ =='__main__':
 
         data = data[i : i + 10000]
 
+        model = FlaxIndicTransForConditionalGeneration.from_pretrained(
+            model_path, 
+            local_files_only=True,
+            dtype=jnp.float16,
+        )
+        print("model loaded")
+
+        params = replicate(model.params)
+        print("model replicated")
+
         main(model, params, data, batch_size, shard)
 
         shard = shard + 1
+
+        del model, params
     
