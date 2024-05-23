@@ -181,5 +181,5 @@ if __name__ =='__main__':
 
         shard_no = shard_no + 1
 
-        del model, params
+        del model, params, batch
     
