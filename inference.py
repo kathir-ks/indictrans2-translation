@@ -186,3 +186,6 @@ if __name__ =='__main__':
 
         del model, params, batch
     
+    with open(f'{subset}_output.json', 'w') as f:
+        json.dump(output_tokens, f)
+        
