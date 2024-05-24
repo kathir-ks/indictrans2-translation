@@ -132,8 +132,8 @@ def main(model, params, data, batch_size, shard_no):
     print("Inference completed!")
     print(time.time() - t)
     
-    # with open(f'{subset}_output_{shard_no}.json', 'w') as f:
-    #     json.dump(outputs, f)
+    with open(f'{subset}_output_{shard_no}.json', 'w') as f:
+        json.dump(outputs, f)
 
     return outputs
 
