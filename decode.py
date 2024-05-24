@@ -28,10 +28,9 @@ if __name__ == '__main__':
     batch_size = args.batch_size
 
     curr_dir = os.getcwd()
-    
+
     file_path = f'{curr_dir}/{subset}_output.json'
 
-    output_tokens = []
     batches = []
     sentences = []
 
@@ -40,13 +39,10 @@ if __name__ == '__main__':
 
     data = load_json_file(file_path)
 
-    for d in data:
-        output_tokens.extend(d)
-    
-    for i in range(0, len(output_tokens), batch_size):
-        batches.extend(output_tokens[i : i + batch_size])
+    for i in range(0, len(data), batch_size):
+        batches.extend(data[i : i + batch_size])
 
-    del output_tokens
+    del data
 
     for batch in batches:
         out = tokenizer.batch_decode(np.asarray(batch), src=False)
