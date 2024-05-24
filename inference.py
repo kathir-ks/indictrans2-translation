@@ -135,8 +135,6 @@ def main(model, params, data, batch_size, shard_no):
     with open(f'{subset}_output_{shard_no}.json', 'w') as f:
         json.dump(outputs, f)
 
-    return outputs
-
 if __name__ =='__main__':
 
     parser = argparse.ArgumentParser(description="Tanslate tokenized sentences")
@@ -163,7 +161,7 @@ if __name__ =='__main__':
 
     
     shard_no = 1
-    output_tokens = []
+    # output_tokens = []
 
     data = load_json_file(file_path=file_path)
 
@@ -181,8 +179,8 @@ if __name__ =='__main__':
         params = replicate(model.params)
         print("model replicated")
 
-        out = main(model, params, batch, batch_size, shard_no)
-        output_tokens.extend(out)
+        main(model, params, batch, batch_size, shard_no)
+        # output_tokens.extend(out)
 
         shard_no = shard_no + 1
 
