@@ -127,7 +127,7 @@ def main(model, params, data, batch_size, shard_no):
 
     for input in inputs:
         output = run_inference_step(input, params, None)
-        outputs.append(output.tolist())
+        outputs.extend(output.tolist())
 
     print("Inference completed!")
     print(time.time() - t)
@@ -135,6 +135,7 @@ def main(model, params, data, batch_size, shard_no):
     with open(f'{subset}_output_{shard_no}.json', 'w') as f:
         json.dump(outputs, f)
 
+    os.system(f'nohup python3 decode.py --file \'{subset}_output_{shard_no}\' --lang \'hin_Deva\' --batch_size 64 --direction \'en-indic\' > {shard_no}.txt &')
 
 if __name__ =='__main__':
 
