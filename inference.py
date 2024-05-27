@@ -127,7 +127,7 @@ def main(model, params, data, batch_size, shard_no):
 
     for input in inputs:
         output = run_inference_step(input, params, None)
-        outputs.extend(output.tolist())
+        outputs.append(output.tolist())
 
     print("Inference completed!")
     print(time.time() - t)
@@ -135,17 +135,16 @@ def main(model, params, data, batch_size, shard_no):
     with open(f'{subset}_output_{shard_no}.json', 'w') as f:
         json.dump(outputs, f)
 
+
 if __name__ =='__main__':
 
     parser = argparse.ArgumentParser(description="Tanslate tokenized sentences")
     parser.add_argument("--subset", type=str, default=None, required=True)
     parser.add_argument("--batch_size", type=int, default=512, help="Batch size")
-    parser.add_argument("--data_batch_size", type=int, default=15000, required=True)
 
     args = parser.parse_args()
     subset = args.subset
     batch_size = args.batch_size
-    data_batch_size = args.data_batch_size
 
     curr_dir = os.getcwd()
     file_path = f'{curr_dir}/{subset}.json'
@@ -161,13 +160,12 @@ if __name__ =='__main__':
 
     
     shard_no = 1
-    # output_tokens = []
 
     data = load_json_file(file_path=file_path)
 
-    for i in range (0, len(data), data_batch_size):
+    for i in range (0, len(data), 10000):
 
-        batch = data[i : i + data_batch_size]
+        batch = data[i : i + 10000]
 
         model = FlaxIndicTransForConditionalGeneration.from_pretrained(
             model_path, 
@@ -180,7 +178,6 @@ if __name__ =='__main__':
         print("model replicated")
 
         main(model, params, batch, batch_size, shard_no)
-        # output_tokens.extend(out)
 
         shard_no = shard_no + 1
 
