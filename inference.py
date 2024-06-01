@@ -135,7 +135,7 @@ def main(model, params, data, batch_size, shard_no):
     with open(f'{subset}_output_{shard_no}.json', 'w') as f:
         json.dump(outputs, f)
 
-    os.system(f'nohup python3 decode.py --file \'{subset}_output_{shard_no}\' --lang \'hin_Deva\' --batch_size 64 --direction \'en-indic\' > {shard_no}.txt &')
+    # os.system(f'nohup python3 decode.py --file \'{subset}_output_{shard_no}\' --lang \'hin_Deva\' --batch_size 64 --direction \'en-indic\' > {shard_no}.txt &')
 
 if __name__ =='__main__':
 
