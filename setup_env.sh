@@ -12,7 +12,7 @@ mkdir flax_weights
 # pip install --editable ./
 
 # Clone and install IndicTransTokenizer
-git clone https://github.com/VarunGumma/IndicTransTokenizer
+git clone https://github.com/kathir-ks/IndicTransTokenizer
 cd IndicTransTokenizer
 pip install --editable ./
 cd ..

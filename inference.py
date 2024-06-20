@@ -6,7 +6,6 @@ import argparse
 from flax.jax_utils import replicate
 from flax.training.common_utils import shard
 from modeling_flax_indictrans import FlaxIndicTransForConditionalGeneration
-from IndicTransTokenizer import IndicTransTokenizer, IndicProcessor
 import json
 import nltk
 nltk.download('punkt')
@@ -135,6 +134,7 @@ def main(model, params, data, batch_size, shard_no):
     with open(f'{subset}_output_{shard_no}.json', 'w') as f:
         json.dump(outputs, f)
 
+    os.system(f'nohup python3 decode.py --file \'{subset}_output_{shard_no}\' > out{shard_no}.txt > &')
 
 if __name__ =='__main__':
 
