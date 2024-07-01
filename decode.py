@@ -17,13 +17,13 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description="decode inference completed output")
     parser.add_argument("--file", type=str, default=None, required=True)
-    # parser.add_argument("--lang", type=str, required=True)
+    parser.add_argument("--lang", type=str, required=True)
     parser.add_argument("--direction", type=str,default="en-indic", required=False)
     parser.add_argument("--batch_size", type=int, default=64, required=False)
 
     args = parser.parse_args()
     file = args.file
-    lang = 'hin_Deva'
+    lang = args.lang
     direction = args.direction
     batch_size = args.batch_size
 
@@ -39,17 +39,24 @@ if __name__ == '__main__':
 
     data = load_json_file(file_path)
 
-    for i in range(0, len(data), batch_size):
-        batches.append(data[i : i + batch_size])
+    tokens = []
+    for d in data:
+        tokens.extend(d)
 
     del data
 
+    for i in range(0, len(tokens), batch_size):
+        batches.append(tokens[i : i + batch_size])
+
+    del tokens
+
     for batch in batches:
-        out = tokenizer.batch_decode(np.asarray(batch), src=False)
-        out = ip.postprocess_batch(out, lang=lang, placeholder_entity_maps={})
-        for i in range(0, len(out)):
-            if "<ID" not in out[i]:
-                sentences.extend(out[i])
+        output = tokenizer.batch_decode(np.asarray(batch), src=False)
+        placeholder_entity_maps = [{}] * len(batch)
+        outputs = ip.postprocess_batch(output, lang=lang, placeholder_entity_maps=placeholder_entity_maps)
+        for output in outputs:
+            if "<ID" not in output:
+                sentences.extend(output)
 
     with open(f'{file}_sentences.json', 'w') as f:
         json.dump(sentences, f)
