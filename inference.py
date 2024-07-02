@@ -141,10 +141,12 @@ if __name__ =='__main__':
     parser = argparse.ArgumentParser(description="Tanslate tokenized sentences")
     parser.add_argument("--subset", type=str, default=None, required=True)
     parser.add_argument("--batch_size", type=int, default=512, help="Batch size")
+    parser.add_argument("--shard_size", type=int, required=True, help="size of each shard")
 
     args = parser.parse_args()
     subset = args.subset
     batch_size = args.batch_size
+    shard_size = args.shard_size
 
     curr_dir = os.getcwd()
     file_path = f'{curr_dir}/{subset}.json'
@@ -162,9 +164,9 @@ if __name__ =='__main__':
 
     data = load_json_file(file_path=file_path)
 
-    for i in range (0, len(data), 10000):
+    for i in range (0, len(data), shard_size):
 
-        batch = data[i : i + 10000]
+        batch = data[i : i + shard_size]
 
         model = FlaxIndicTransForConditionalGeneration.from_pretrained(
             model_path, 
